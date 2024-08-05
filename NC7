@@ -1,0 +1,127 @@
+local player = game.Players.LocalPlayer
+
+local function createUI()
+    local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+    -- زر لعرض الأزرار الأخرى
+    local showButton = Instance.new("TextButton", screenGui)
+    showButton.Size = UDim2.new(0, 50, 0, 50)
+    showButton.Position = UDim2.new(0, 10, 0, 10)
+    showButton.Text = "NC7"
+    showButton.TextScaled = true
+    showButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    showButton.TextColor3 = Color3.new(1, 1, 1)
+    showButton.AutoButtonColor = false
+    showButton.BorderSizePixel = 0
+    showButton.BackgroundTransparency = 0.8
+    showButton.TextTransparency = 0.8
+
+    -- إطار لتخزين الأزرار الأخرى
+    local controlFrame = Instance.new("Frame", screenGui)
+    controlFrame.Size = UDim2.new(0, 100, 0, 200)
+    controlFrame.Position = UDim2.new(0, 10, 0, 60)
+    controlFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    controlFrame.Visible = false
+    controlFrame.Active = true
+    controlFrame.Draggable = true
+    controlFrame.BackgroundTransparency = 0.8
+
+    -- زر لزيادة السرعة
+    local increaseSpeedButton = Instance.new("TextButton", controlFrame)
+    increaseSpeedButton.Size = UDim2.new(1, 0, 0.2, 0)
+    increaseSpeedButton.Position = UDim2.new(0, 0, 0, 0)
+    increaseSpeedButton.Text = "زيادة السرعة"
+    increaseSpeedButton.TextScaled = true
+    increaseSpeedButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    increaseSpeedButton.TextColor3 = Color3.new(1, 1, 1)
+    increaseSpeedButton.BackgroundTransparency = 0.8
+    increaseSpeedButton.TextTransparency = 0.8
+
+    -- زر لتقليل السرعة
+    local decreaseSpeedButton = Instance.new("TextButton", controlFrame)
+    decreaseSpeedButton.Size = UDim2.new(1, 0, 0.2, 0)
+    decreaseSpeedButton.Position = UDim2.new(0, 0, 0.2, 0)
+    decreaseSpeedButton.Text = "تقليل السرعة"
+    decreaseSpeedButton.TextScaled = true
+    decreaseSpeedButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    decreaseSpeedButton.TextColor3 = Color3.new(1, 1, 1)
+    decreaseSpeedButton.BackgroundTransparency = 0.8
+    decreaseSpeedButton.TextTransparency = 0.8
+
+    -- زر للسرعة القصوى
+    local maxSpeedButton = Instance.new("TextButton", controlFrame)
+    maxSpeedButton.Size = UDim2.new(1, 0, 0.2, 0)
+    maxSpeedButton.Position = UDim2.new(0, 0, 0.4, 0)
+    maxSpeedButton.Text = "السرعة القصوى"
+    maxSpeedButton.TextScaled = true
+    maxSpeedButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    maxSpeedButton.TextColor3 = Color3.new(1, 1, 1)
+    maxSpeedButton.BackgroundTransparency = 0.8
+    maxSpeedButton.TextTransparency = 0.8
+
+    -- دالة لعرض/إخفاء إطار التحكم
+    local function toggleControls()
+        controlFrame.Visible = not controlFrame.Visible
+    end
+
+    -- دالة لزيادة السرعة
+    local function increaseSpeed()
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = humanoid.WalkSpeed + 10
+            print("تم زيادة سرعة اللاعب إلى: " .. humanoid.WalkSpeed)
+        end
+    end
+
+    -- دالة لتقليل السرعة
+    local function decreaseSpeed()
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = math.max(0, humanoid.WalkSpeed - 10)
+            print("تم تقليل سرعة اللاعب إلى: " .. humanoid.WalkSpeed)
+        end
+    end
+
+    -- دالة لتعيين السرعة القصوى
+    local function setMaxSpeed()
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 100
+            print("تم تعيين سرعة اللاعب إلى: 100")
+        end
+    end
+
+    -- ربط أحداث الضغط على الأزرار
+    showButton.MouseButton1Click:Connect(toggleControls)
+    increaseSpeedButton.MouseButton1Click:Connect(increaseSpeed)
+    decreaseSpeedButton.MouseButton1Click:Connect(decreaseSpeed)
+    maxSpeedButton.MouseButton1Click:Connect(setMaxSpeed)
+
+    -- السماح بسحب الأزرار
+    local function onInput(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local dragStart = input.Position
+            local startPos = controlFrame.Position
+
+            local function updatePosition()
+                local delta = input.Position - dragStart
+                controlFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+
+            local connection
+            connection = input.InputChanged:Connect(updatePosition)
+            input.InputEnded:Connect(function()
+                connection:Disconnect()
+            end)
+        end
+    end
+
+    showButton.InputBegan:Connect(onInput)
+    controlFrame.InputBegan:Connect(onInput)
+end
+
+player.CharacterAdded:Connect(createUI)
+
+if player.Character then
+    createUI()
+end
